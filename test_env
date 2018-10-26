@@ -1,0 +1,4 @@
+TEST_USER="<username>"
+TEST_TEAM="<team>"
+TEST_REPO="<repo>"
+TEST_API_KEY="<app_pw_not_account_pw>"
