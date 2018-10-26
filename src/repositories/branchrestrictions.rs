@@ -1,5 +1,8 @@
 use api;
 
+use serde_json;
+use std::collections::HashMap;
+
 #[derive(Clone, Debug)]
 pub struct BranchRestrictionBuilder {
     username: String,
@@ -26,9 +29,9 @@ impl api::GetQueryBuilder for BranchRestrictionBuilder {
     }
 }
 
-use serde_json;
-use std::collections::HashMap;
+/// BitBucket data structure representing a single Repository
 #[derive(Debug, Clone, Deserialize)]
+#[allow(missing_docs)]
 pub struct BranchPermission {
     pub id: u64,
     pub kind: String,

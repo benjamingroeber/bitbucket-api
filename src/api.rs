@@ -200,6 +200,7 @@ pub(crate) enum BitBucketResponse<T> {
 
 // Reexport Specific DS
 pub use pullrequests::PullRequest;
+pub use repositories::branchrestrictions::BranchPermission;
 pub use repositories::Repository;
 pub use users::User;
 
