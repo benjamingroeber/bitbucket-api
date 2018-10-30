@@ -215,24 +215,28 @@ pub enum Link {
     Link { href: String, name: Option<String> },
 }
 
-/// Branch name
+/// Branch defined by its name
 #[derive(Debug, Clone, Deserialize)]
 pub struct Branch {
-    name: String,
+    /// Name of the Branch
+    pub name: String,
 }
 
 /// Commit hash with Links
 #[derive(Debug, Clone, Deserialize)]
 pub struct Commit {
-    hash: String,
-    links: HashMap<String, Link>,
+    /// Digest representing a specific commit commit
+    pub hash: String,
+    /// Various Links related to a specific commit
+    pub links: HashMap<String, Link>,
 }
 
 /// Represents PullRequest data structure, Pointing to Source/Destination Branch,Commit,Repo
 /// This will probably be moved into pullrequests
 #[derive(Debug, Clone, Deserialize)]
+#[allow(missing_docs)]
 pub struct Sourctination {
-    branch: Branch,
-    commit: Commit,
-    repository: serde_json::Value,
+    pub branch: Branch,
+    pub commit: Commit,
+    pub repository: serde_json::Value,
 }
