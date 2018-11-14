@@ -22,6 +22,25 @@ pub trait GetQueryBuilder {
     fn get_query(&self) -> BitBucketQuery;
 }
 
+const HTML_LINK_NAME: &str = "html";
+/// This Trait is implemented for API Objects that contain a link to themselves
+pub trait HtmlLink {
+    /// get_url() returns a Link to the Object
+    fn get_url(&self) -> Option<&str>{
+        if let Some(link) = self.links().get(HTML_LINK_NAME) {
+            match link {
+                Link::Link {href,..} => Some(href),
+                Link::Multi(_) => unreachable!("{} can never be Multi Link variant")
+            }
+        } else {
+            None
+        }
+    }
+    /// this helper method returns a reference to the internal HashMap<String,Link>
+    fn links(&self)-> &HashMap<String,Link>;
+
+}
+
 /// Api is used to handle authentication. This part may be subject to change very soon.
 #[derive(Debug, Clone)]
 pub struct Api {
