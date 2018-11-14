@@ -38,3 +38,10 @@ pub struct User {
     pub location: Option<String>,
     pub website: Option<String>,
 }
+
+use std::fmt;
+impl fmt::Display for User {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", self.display_name)
+    }
+}
