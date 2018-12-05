@@ -64,3 +64,9 @@ pub struct Repository {
     pub slug: String,
     pub is_private: bool,
 }
+
+impl api::HtmlLink for Repository {
+    fn links(&self) -> &HashMap<String,api::Link>{
+        &self.links
+    }
+}

@@ -22,6 +22,25 @@ pub trait GetQueryBuilder {
     fn get_query(&self) -> BitBucketQuery;
 }
 
+const HTML_LINK_NAME: &str = "html";
+/// This Trait is implemented for API Objects that contain a link to themselves
+pub trait HtmlLink {
+    /// get_url() returns a Link to the Object
+    fn get_url(&self) -> Option<&str>{
+        if let Some(link) = self.links().get(HTML_LINK_NAME) {
+            match link {
+                Link::Link {href,..} => Some(href),
+                Link::Multi(_) => unreachable!("{} can never be Multi Link variant")
+            }
+        } else {
+            None
+        }
+    }
+    /// this helper method returns a reference to the internal HashMap<String,Link>
+    fn links(&self)-> &HashMap<String,Link>;
+
+}
+
 /// Api is used to handle authentication. This part may be subject to change very soon.
 #[derive(Debug, Clone)]
 pub struct Api {
@@ -200,6 +219,7 @@ pub(crate) enum BitBucketResponse<T> {
 
 // Reexport Specific DS
 pub use pullrequests::PullRequest;
+pub use repositories::branchrestrictions::BranchPermission;
 pub use repositories::Repository;
 pub use users::User;
 
@@ -214,24 +234,28 @@ pub enum Link {
     Link { href: String, name: Option<String> },
 }
 
-/// Branch name
+/// Branch defined by its name
 #[derive(Debug, Clone, Deserialize)]
 pub struct Branch {
-    name: String,
+    /// Name of the Branch
+    pub name: String,
 }
 
 /// Commit hash with Links
 #[derive(Debug, Clone, Deserialize)]
 pub struct Commit {
-    hash: String,
-    links: HashMap<String, Link>,
+    /// Digest representing a specific commit commit
+    pub hash: String,
+    /// Various Links related to a specific commit
+    pub links: HashMap<String, Link>,
 }
 
 /// Represents PullRequest data structure, Pointing to Source/Destination Branch,Commit,Repo
 /// This will probably be moved into pullrequests
 #[derive(Debug, Clone, Deserialize)]
+#[allow(missing_docs)]
 pub struct Sourctination {
-    branch: Branch,
-    commit: Commit,
-    repository: serde_json::Value,
+    pub branch: Branch,
+    pub commit: Commit,
+    pub repository: serde_json::Value,
 }

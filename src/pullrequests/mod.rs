@@ -1,5 +1,6 @@
 use api;
 
+use std::fmt;
 use serde_json;
 use std::collections::HashMap;
 
@@ -48,6 +49,12 @@ pub struct PullRequest {
     pub updated_on: String,
 }
 
+impl api::HtmlLink for PullRequest {
+    fn links(&self) -> &HashMap<String,api::Link> {
+        &self.links
+    }
+}
+
 /// BitBucket data structure representing all possible states for a PullRequest
 #[derive(Debug, Copy, Clone, Deserialize)]
 pub enum PullRequestState {
@@ -59,4 +66,15 @@ pub enum PullRequestState {
     OPEN,
     #[allow(missing_docs)]
     DECLINED,
+}
+
+impl fmt::Display for PullRequestState {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match *self {
+            PullRequestState::MERGED => write!(f, "Merged"),
+            PullRequestState::SUPERSEDED => write!(f, "Superseeded"),
+            PullRequestState::OPEN => write!(f, "Open"),
+            PullRequestState::DECLINED => write!(f, "Declined"),
+        }
+    }
 }
