@@ -22,6 +22,16 @@ pub trait GetQueryBuilder {
     fn get_query(&self) -> BitBucketQuery;
 }
 
+/// The GetQueryBuilder Trait defines the datastructure needed when passed to API::post.
+/// Implementing it requires also the definition of the exact Rest Endpoint Called by the Query.
+pub trait PostQueryBuilder {
+    /// The associated type Item defines the data structure needed by the BitBucketQuery
+    type Item: serde::ser::Serialize + fmt::Debug;
+    /// The get_query method defines the exact Rest API Endpoint to be called
+    /// relative to the API base url https://api.bitbucket.org/v2/
+    fn get_query(&self) -> BitBucketQuery;
+}
+
 const HTML_LINK_NAME: &str = "html";
 /// This Trait is implemented for API Objects that contain a link to themselves
 pub trait HtmlLink {
@@ -110,6 +120,34 @@ impl Api {
         Ok(data)
     }
 
+
+    /// This is the main Interface for POST requests between Rust Code and the BitBucket API.
+    /// ```
+    /// use bitbucket_api::api::Api;
+    ///
+    /// # use bitbucket_api::test_utils;
+    /// # let env = test_utils::get_test_env();
+    ///
+    /// let user = env.user;
+    /// let api_key = env.api_key;
+    ///
+    /// let api = Api::new(&user, &api_key);
+    /// let query = api.user(&user);
+    ///
+    /// let user = api.get(&query);
+    /// assert!(user.is_ok());
+    /// ```
+    pub fn post<T>(&self, query: &PostQueryBuilder<Item = T>, payload: &T) -> Result<(), Box<error::Error>>
+        where
+            T: serde::ser::Serialize + fmt::Debug,
+    {
+
+        let url = query.get_query().get_url();
+        let mut handle = self.get_curl_handle(&url)?;
+        let data = serde_json::to_vec(payload)?;
+        post_curl_data(&mut handle, &mut data.as_ref())
+    }
+
     fn append_paged_data<T>(
         &self,
         data: &mut Vec<T>,
@@ -163,8 +201,19 @@ fn fetch_curl_data(handle: &mut Easy, buf: &mut Vec<u8>) -> Result<(), Box<error
         buf.extend_from_slice(data);
         Ok(data.len())
     })?;
-    transfer.perform()?;
-    Ok(())
+    Ok(transfer.perform()?)
+}
+
+use std::io::Read;
+fn post_curl_data(handle: &mut Easy, data: &mut &[u8]) -> Result<(), Box<error::Error>> {
+    handle.post(true)?;
+    handle.post_field_size(data.len() as u64)?;
+
+    let mut transfer = handle.transfer();
+    transfer.read_function(|buf| {
+        Ok(data.read(buf).unwrap_or(0))
+    }).unwrap();
+    Ok(transfer.perform()?)
 }
 
 /// This is a simple structure for constructing a Rest API Endpoint URL/URI in String Format.
